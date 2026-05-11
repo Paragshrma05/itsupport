@@ -54,7 +54,7 @@ itsupport/
 
 ```bash
 # 1. Clone and enter
-git clone https://github.com/youruser/itsupport.git
+git clone https://github.com/Paragshrma05/itsupport.git
 cd itsupport
 
 # 2. Create virtual environment
