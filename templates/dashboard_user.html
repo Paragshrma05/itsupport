@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% set current_user = user %}
+{% block title %}My Dashboard{% endblock %}
+{% block page_title %}// my dashboard{% endblock %}
+
+{% block content %}
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
+  <div class="stat-card">
+    <div class="stat-label">My Tickets</div>
+    <div class="stat-value" style="color:var(--accent2);">{{ my_total }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Open</div>
+    <div class="stat-value" style="color:#60a5fa;">{{ my_open }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Resolved</div>
+    <div class="stat-value" style="color:var(--success);">{{ my_total - my_open }}</div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;">
+  <div class="card-dark">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <span style="font-family:var(--mono);font-size:.8rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">Recent Tickets</span>
+      <a href="/tickets" class="btn-ghost" style="font-size:.75rem;padding:5px 12px;">View all</a>
+    </div>
+    <table class="table-dark-custom">
+      <thead><tr><th>#</th><th>Title</th><th>Priority</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for t in my_tickets %}
+        <tr>
+          <td style="font-family:var(--mono);color:var(--muted);font-size:.75rem;">#{{ t.id }}</td>
+          <td><a href="/tickets/{{ t.id }}">{{ t.title[:45] }}{% if t.title|length > 45 %}…{% endif %}</a></td>
+          <td><span class="badge-priority badge-{{ t.priority.lower() }}">{{ t.priority }}</span></td>
+          <td>
+            {% if t.status == 'Open' %}<span class="badge-status badge-open">Open</span>
+            {% elif t.status == 'In Progress' %}<span class="badge-status badge-progress">In Progress</span>
+            {% else %}<span class="badge-status badge-resolved">Resolved</span>{% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:32px;">No tickets yet. <a href="/tickets/new" style="color:var(--accent2);">Create your first</a></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    <a href="/tickets/new" class="card-dark" style="text-decoration:none;border-color:rgba(59,130,246,.3);">
+      <div style="text-align:center;padding:8px;">
+        <i class="fa fa-plus-circle" style="font-size:1.5rem;color:var(--accent2);margin-bottom:8px;"></i>
+        <div style="font-weight:500;">New Ticket</div>
+        <div style="font-size:.75rem;color:var(--muted);margin-top:4px;">Submit a support request</div>
+      </div>
+    </a>
+    <a href="/log-analyzer" class="card-dark" style="text-decoration:none;border-color:rgba(59,130,246,.2);">
+      <div style="text-align:center;padding:8px;">
+        <i class="fa fa-magnifying-glass-chart" style="font-size:1.5rem;color:var(--accent2);margin-bottom:8px;"></i>
+        <div style="font-weight:500;">Log Analyzer</div>
+        <div style="font-size:.75rem;color:var(--muted);margin-top:4px;">Analyze your log files</div>
+      </div>
+    </a>
+  </div>
+</div>
+{% endblock %}

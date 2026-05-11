@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% set current_user = user %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block page_title %}// dashboard{% endblock %}
+
+{% block content %}
+<style>
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .section-title { font-family: var(--mono); font-size: .8rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .progress-bar-wrap { background: var(--surface2); border-radius: 4px; height: 6px; margin-top: 8px; }
+  .progress-bar-fill { height: 6px; border-radius: 4px; transition: width .8s ease; }
+  @media (max-width: 1100px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } .grid-2 { grid-template-columns: 1fr; } }
+</style>
+
+<!-- STAT CARDS -->
+<div class="grid-4">
+  <div class="stat-card">
+    <div class="stat-label">Total Tickets</div>
+    <div class="stat-value" style="color:var(--accent2);">{{ total }}</div>
+    <div style="font-size:.72rem;color:var(--muted);margin-top:4px;font-family:var(--mono);">all time</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Open</div>
+    <div class="stat-value" style="color:#60a5fa;">{{ open_count }}</div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:{% if total %}{{ (open_count/total*100)|int }}{% else %}0{% endif %}%;background:#60a5fa;"></div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">In Progress</div>
+    <div class="stat-value" style="color:#fbbf24;">{{ in_progress }}</div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:{% if total %}{{ (in_progress/total*100)|int }}{% else %}0{% endif %}%;background:#fbbf24;"></div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Critical</div>
+    <div class="stat-value" style="color:#f87171;">{{ critical }}</div>
+    <div style="font-size:.72rem;color:var(--muted);margin-top:4px;font-family:var(--mono);">needs attention</div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <!-- RECENT TICKETS -->
+  <div class="card-dark">
+    <div class="section-header">
+      <span class="section-title">Recent Tickets</span>
+      <a href="/tickets" class="btn-ghost" style="font-size:.75rem;padding:5px 12px;">View all <i class="fa fa-arrow-right"></i></a>
+    </div>
+    <table class="table-dark-custom">
+      <thead>
+        <tr>
+          <th>#</th><th>Title</th><th>Category</th><th>Priority</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in recent_tickets %}
+        <tr>
+          <td style="font-family:var(--mono);color:var(--muted);font-size:.75rem;">#{{ t.id }}</td>
+          <td><a href="/tickets/{{ t.id }}">{{ t.title[:40] }}{% if t.title|length > 40 %}…{% endif %}</a></td>
+          <td style="font-size:.75rem;color:var(--muted);">{{ t.category }}</td>
+          <td>
+            <span class="badge-priority badge-{{ t.priority.lower() }}">{{ t.priority }}</span>
+          </td>
+          <td>
+            {% if t.status == 'Open' %}<span class="badge-status badge-open">Open</span>
+            {% elif t.status == 'In Progress' %}<span class="badge-status badge-progress">In Progress</span>
+            {% else %}<span class="badge-status badge-resolved">Resolved</span>{% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px;">No tickets yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SIDE PANEL -->
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    <div class="card-dark">
+      <div class="section-title" style="margin-bottom:16px;">System Health</div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-size:.8rem;">Resolution Rate</span>
+            <span style="font-family:var(--mono);font-size:.8rem;color:var(--success);">{% if total %}{{ (resolved/total*100)|int }}{% else %}0{% endif %}%</span>
+          </div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:{% if total %}{{ (resolved/total*100)|int }}{% else %}0{% endif %}%;background:var(--success);"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-size:.8rem;">Open Backlog</span>
+            <span style="font-family:var(--mono);font-size:.8rem;color:#60a5fa;">{% if total %}{{ (open_count/total*100)|int }}{% else %}0{% endif %}%</span>
+          </div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:{% if total %}{{ (open_count/total*100)|int }}{% else %}0{% endif %}%;background:#60a5fa;"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-dark">
+      <div class="section-title" style="margin-bottom:16px;">Quick Stats</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--surface2);border-radius:6px;">
+          <span style="font-size:.8rem;color:var(--muted);">Total Users</span>
+          <span style="font-family:var(--mono);font-size:.8rem;">{{ total_users }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--surface2);border-radius:6px;">
+          <span style="font-size:.8rem;color:var(--muted);">Resolved</span>
+          <span style="font-family:var(--mono);font-size:.8rem;color:var(--success);">{{ resolved }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--surface2);border-radius:6px;">
+          <span style="font-size:.8rem;color:var(--muted);">In Progress</span>
+          <span style="font-family:var(--mono);font-size:.8rem;color:#fbbf24;">{{ in_progress }}</span>
+        </div>
+      </div>
+    </div>
+
+    <a href="/log-analyzer" class="card-dark" style="text-decoration:none;display:block;border-color:rgba(59,130,246,.3);transition:border-color .2s;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:40px;height:40px;background:rgba(59,130,246,.1);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+          <i class="fa fa-magnifying-glass-chart" style="color:var(--accent2);"></i>
+        </div>
+        <div>
+          <div style="font-size:.875rem;font-weight:500;color:var(--text);">Log Analyzer</div>
+          <div style="font-size:.75rem;color:var(--muted);">AI-powered log analysis</div>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
+{% endblock %}

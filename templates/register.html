@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+
+{% block auth_content %}
+<style>
+  .auth-wrap {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: var(--bg);
+    background-image: radial-gradient(ellipse at 80% 50%, rgba(59,130,246,.08) 0%, transparent 60%);
+  }
+  .auth-card {
+    width: 440px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 40px;
+  }
+  .auth-logo { font-family: var(--mono); font-size: 1.1rem; color: var(--accent2); margin-bottom: 6px; }
+  .auth-sub { font-size: .8rem; color: var(--muted); margin-bottom: 32px; }
+</style>
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-logo">&#x25A3; SupportDesk</div>
+    <div class="auth-sub">IT Operations // Helpdesk Platform</div>
+    <h1 style="font-size:1.4rem;font-weight:600;margin-bottom:4px;">Create account</h1>
+    <p style="font-size:.85rem;color:var(--muted);margin-bottom:24px;">Join your team's support platform</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+      <div class="flash-msg flash-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="POST" action="/register">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+        <div>
+          <label class="form-label">Username</label>
+          <input type="text" name="username" class="form-ctrl" placeholder="jdoe" required/>
+        </div>
+        <div>
+          <label class="form-label">Role</label>
+          <select name="role" class="form-ctrl">
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:16px;">
+        <label class="form-label">Email address</label>
+        <input type="email" name="email" class="form-ctrl" placeholder="you@company.com" required/>
+      </div>
+      <div style="margin-bottom:24px;">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-ctrl" placeholder="Min. 6 characters" required minlength="6"/>
+      </div>
+      <button type="submit" class="btn-primary-custom" style="width:100%;justify-content:center;">
+        <i class="fa fa-user-plus"></i> Create account
+      </button>
+    </form>
+
+    <div style="height:1px;background:var(--border);margin:20px 0;"></div>
+    <p style="font-size:.8rem;color:var(--muted);text-align:center;">
+      Already have an account? <a href="/login" style="color:var(--accent2);">Sign in</a>
+    </p>
+    <p style="font-size:.72rem;color:var(--muted);margin-top:12px;font-family:var(--mono);">
+      Note: Only one admin account allowed. Subsequent admin registrations default to user role.
+    </p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% set current_user = user %}
+{% block title %}Log Analyzer{% endblock %}
+{% block page_title %}// log analyzer{% endblock %}
+
+{% block content %}
+<div style="max-width:860px;">
+  <div style="margin-bottom:20px;">
+    <h2 style="font-size:1.1rem;font-weight:600;margin-bottom:4px;">AI Log Analyzer</h2>
+    <p style="font-size:.85rem;color:var(--muted);">Paste or upload a log file. AI will detect auth failures, timeouts, API errors, DB issues, and more.</p>
+  </div>
+
+  <div class="card-dark" style="margin-bottom:24px;">
+    <form method="POST" action="/log-analyzer" enctype="multipart/form-data">
+      <div style="margin-bottom:16px;">
+        <label class="form-label">Upload Log File</label>
+        <input type="file" name="log_file" accept=".log,.txt" class="form-ctrl" style="padding:8px;"/>
+        <div style="font-size:.72rem;color:var(--muted);margin-top:4px;font-family:var(--mono);">Accepted: .log, .txt (max 2MB)</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+        <span style="font-size:.75rem;color:var(--muted);">or paste below</span>
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+      </div>
+      <div style="margin-bottom:20px;">
+        <label class="form-label">Log Content</label>
+        <textarea name="log_text" class="form-ctrl" rows="10" style="resize:vertical;font-family:var(--mono);font-size:.8rem;" placeholder="[2024-01-15 09:23:41] ERROR Authentication failed for user admin@corp.com&#10;[2024-01-15 09:23:55] WARN  DB connection timeout after 30000ms&#10;[2024-01-15 09:24:01] ERROR API call to /api/v2/users returned 503&#10;..."></textarea>
+      </div>
+      <button type="submit" class="btn-primary-custom">
+        <i class="fa fa-robot"></i> Analyze Log
+      </button>
+    </form>
+  </div>
+
+  {% if result %}
+  <!-- RESULTS -->
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    <!-- HEALTH SCORE -->
+    <div class="card-dark">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div style="font-family:var(--mono);font-size:.75rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">System Health Score</div>
+        {% set score = result.health_score|int %}
+        <span style="font-family:var(--mono);font-size:1.5rem;font-weight:600;color:{% if score >= 80 %}var(--success){% elif score >= 50 %}var(--warning){% else %}var(--danger){% endif %};">
+          {{ score }}/100
+        </span>
+      </div>
+      <div style="background:var(--surface2);border-radius:6px;height:8px;overflow:hidden;">
+        <div style="height:8px;width:{{ score }}%;background:{% if score >= 80 %}var(--success){% elif score >= 50 %}var(--warning){% else %}var(--danger){% endif %};border-radius:6px;transition:width 1s ease;"></div>
+      </div>
+      <p style="margin-top:12px;font-size:.875rem;color:var(--text);">{{ result.summary }}</p>
+    </div>
+
+    <!-- DETECTED ISSUES -->
+    {% if result.issues %}
+    <div class="card-dark">
+      <div style="font-family:var(--mono);font-size:.75rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:16px;">Detected Issues</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        {% for issue in result.issues %}
+        <div style="display:flex;align-items:center;gap:16px;padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
+          <div style="width:40px;height:40px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+            background:{% if issue.severity=='Critical' %}rgba(239,68,68,.1){% elif issue.severity=='High' %}rgba(249,115,22,.1){% elif issue.severity=='Medium' %}rgba(245,158,11,.1){% else %}rgba(100,116,139,.1){% endif %};">
+            <i class="fa fa-{% if issue.severity=='Critical' %}skull{% elif issue.severity=='High' %}exclamation-triangle{% elif issue.severity=='Medium' %}exclamation-circle{% else %}info-circle{% endif %}"
+               style="color:{% if issue.severity=='Critical' %}#f87171{% elif issue.severity=='High' %}#fb923c{% elif issue.severity=='Medium' %}#fbbf24{% else %}#94a3b8{% endif %};"></i>
+          </div>
+          <div style="flex:1;">
+            <div style="font-weight:500;font-size:.875rem;">{{ issue.type }}</div>
+            <div style="font-size:.78rem;color:var(--muted);margin-top:2px;">{{ issue.detail }}</div>
+          </div>
+          <div style="text-align:right;">
+            <span class="badge-priority badge-{{ issue.severity.lower() }}">{{ issue.severity }}</span>
+            {% if issue.count > 0 %}
+            <div style="font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-top:4px;">{{ issue.count }}x</div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- RECOMMENDATIONS -->
+    {% if result.recommendations %}
+    <div class="ai-box">
+      <div class="ai-box-title"><i class="fa fa-robot"></i> AI Recommendations</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        {% for rec in result.recommendations %}
+        <div style="display:flex;gap:10px;font-size:.875rem;">
+          <span style="color:var(--accent2);flex-shrink:0;">→</span>
+          <span>{{ rec }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

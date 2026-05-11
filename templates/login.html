@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+
+{% block auth_content %}
+<style>
+  .auth-wrap {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: var(--bg);
+    background-image: radial-gradient(ellipse at 20% 50%, rgba(59,130,246,.08) 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 20%, rgba(96,165,250,.05) 0%, transparent 60%);
+  }
+  .auth-card {
+    width: 420px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 40px;
+  }
+  .auth-logo {
+    font-family: var(--mono); font-size: 1.1rem; color: var(--accent2);
+    margin-bottom: 6px;
+  }
+  .auth-sub { font-size: .8rem; color: var(--muted); margin-bottom: 32px; }
+  .auth-card h1 { font-size: 1.4rem; font-weight: 600; margin-bottom: 4px; }
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+  .demo-box {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px; font-family: var(--mono); font-size: .72rem; color: var(--muted);
+    margin-top: 20px;
+  }
+  .demo-box .demo-title { color: var(--accent2); margin-bottom: 6px; }
+  .demo-box div { margin-bottom: 2px; }
+</style>
+<div class="auth-wrap">
+  <div>
+    <div class="auth-card">
+      <div class="auth-logo">&#x25A3; SupportDesk</div>
+      <div class="auth-sub">IT Operations // Helpdesk Platform</div>
+      <h1>Sign in</h1>
+      <p style="font-size:.85rem;color:var(--muted);margin-bottom:24px;">Enter your credentials to continue</p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+        <div class="flash-msg flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endwith %}
+
+      <form method="POST" action="/login">
+        <div style="margin-bottom:16px;">
+          <label class="form-label">Email address</label>
+          <input type="email" name="email" class="form-ctrl" placeholder="you@company.com" required autofocus/>
+        </div>
+        <div style="margin-bottom:24px;">
+          <label class="form-label">Password</label>
+          <input type="password" name="password" class="form-ctrl" placeholder="••••••••" required/>
+        </div>
+        <button type="submit" class="btn-primary-custom" style="width:100%;justify-content:center;">
+          <i class="fa fa-arrow-right-to-bracket"></i> Sign in
+        </button>
+      </form>
+
+      <div class="divider"></div>
+      <p style="font-size:.8rem;color:var(--muted);text-align:center;">
+        Don't have an account? <a href="/register" style="color:var(--accent2);">Register</a>
+      </p>
+
+      <div class="demo-box">
+        <div class="demo-title">// DEMO CREDENTIALS</div>
+        <div>admin@itsupport.dev / admin123 (Admin)</div>
+        <div>jsmith@itsupport.dev / user123 (User)</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

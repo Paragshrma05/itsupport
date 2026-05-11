@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}SupportDesk{% endblock %} — IT Support</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:        #0d0f14;
+      --surface:   #141720;
+      --surface2:  #1c2030;
+      --border:    #252a3a;
+      --accent:    #3b82f6;
+      --accent2:   #60a5fa;
+      --success:   #22c55e;
+      --warning:   #f59e0b;
+      --danger:    #ef4444;
+      --critical:  #f97316;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --mono:      'IBM Plex Mono', monospace;
+      --sans:      'IBM Plex Sans', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; }
+
+    /* SIDEBAR */
+    .sidebar {
+      position: fixed; top: 0; left: 0; bottom: 0;
+      width: 240px; background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      z-index: 100; transition: transform .25s;
+    }
+    .sidebar-brand {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-brand .logo {
+      font-family: var(--mono); font-size: 1rem; font-weight: 600;
+      color: var(--accent2); letter-spacing: -.5px;
+    }
+    .sidebar-brand .sub { font-size: .7rem; color: var(--muted); font-family: var(--mono); }
+    .sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+    .nav-section-label {
+      font-family: var(--mono); font-size: .6rem; color: var(--muted);
+      letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 8px 12px 4px; margin-top: 8px;
+    }
+    .nav-item a, .nav-item button.nav-link-btn {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: 6px; font-size: .875rem;
+      color: var(--muted); text-decoration: none;
+      transition: all .15s; width: 100%;
+      background: none; border: none; cursor: pointer; font-family: var(--sans);
+    }
+    .nav-item a:hover, .nav-item button.nav-link-btn:hover,
+    .nav-item a.active, .nav-item button.nav-link-btn.active {
+      color: var(--text); background: var(--surface2);
+    }
+    .nav-item a.active { color: var(--accent2); }
+    .nav-item a i, .nav-item button i { width: 16px; text-align: center; font-size: .875rem; }
+    .sidebar-footer {
+      padding: 16px; border-top: 1px solid var(--border);
+      font-size: .75rem; color: var(--muted);
+    }
+    .user-pill {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px; background: var(--surface2); border-radius: 8px;
+    }
+    .user-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--accent); display: flex; align-items: center;
+      justify-content: center; font-weight: 600; font-size: .75rem;
+      color: #fff; flex-shrink: 0;
+    }
+    .user-info .name { font-weight: 500; color: var(--text); font-size: .8rem; }
+    .user-info .badge-role {
+      font-family: var(--mono); font-size: .6rem; padding: 1px 6px;
+      border-radius: 3px; background: rgba(59,130,246,.15); color: var(--accent2);
+    }
+
+    /* MAIN CONTENT */
+    .main-wrap { margin-left: 240px; min-height: 100vh; }
+    .topbar {
+      padding: 16px 32px; background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar-title { font-family: var(--mono); font-size: .9rem; color: var(--text); }
+    .content { padding: 32px; }
+
+    /* CARDS */
+    .card-dark {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 24px;
+    }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 20px 24px;
+      transition: border-color .2s;
+    }
+    .stat-card:hover { border-color: var(--accent); }
+    .stat-value { font-family: var(--mono); font-size: 2rem; font-weight: 600; }
+    .stat-label { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+
+    /* BADGES */
+    .badge-status, .badge-priority, .badge-cat {
+      font-family: var(--mono); font-size: .65rem; padding: 3px 8px;
+      border-radius: 4px; font-weight: 500; letter-spacing: .5px;
+    }
+    .badge-open       { background: rgba(59,130,246,.12); color: #60a5fa; border: 1px solid rgba(59,130,246,.3); }
+    .badge-progress   { background: rgba(245,158,11,.12); color: #fbbf24; border: 1px solid rgba(245,158,11,.3); }
+    .badge-resolved   { background: rgba(34,197,94,.12); color: #4ade80; border: 1px solid rgba(34,197,94,.3); }
+    .badge-low        { background: rgba(100,116,139,.12); color: #94a3b8; border: 1px solid rgba(100,116,139,.3); }
+    .badge-medium     { background: rgba(59,130,246,.12); color: #60a5fa; border: 1px solid rgba(59,130,246,.3); }
+    .badge-high       { background: rgba(249,115,22,.12); color: #fb923c; border: 1px solid rgba(249,115,22,.3); }
+    .badge-critical   { background: rgba(239,68,68,.12); color: #f87171; border: 1px solid rgba(239,68,68,.3); animation: pulse-badge 2s infinite; }
+    @keyframes pulse-badge { 0%,100%{opacity:1} 50%{opacity:.7} }
+
+    /* BUTTONS */
+    .btn-primary-custom {
+      background: var(--accent); color: #fff; border: none;
+      padding: 9px 20px; border-radius: 6px; font-size: .875rem;
+      font-weight: 500; cursor: pointer; transition: background .15s;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-primary-custom:hover { background: var(--accent2); color: #fff; }
+    .btn-ghost {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      padding: 7px 16px; border-radius: 6px; font-size: .875rem;
+      cursor: pointer; transition: all .15s; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent2); }
+
+    /* FORMS */
+    .form-ctrl {
+      width: 100%; background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); padding: 10px 14px; border-radius: 6px; font-size: .875rem;
+      font-family: var(--sans); transition: border-color .15s;
+      -webkit-appearance: none;
+    }
+    .form-ctrl:focus { outline: none; border-color: var(--accent); }
+    .form-ctrl::placeholder { color: var(--muted); }
+    label.form-label { font-size: .8rem; color: var(--muted); margin-bottom: 6px; display: block; letter-spacing: .3px; }
+
+    /* TABLE */
+    .table-dark-custom { width: 100%; border-collapse: collapse; }
+    .table-dark-custom th {
+      font-family: var(--mono); font-size: .65rem; letter-spacing: 1px;
+      text-transform: uppercase; color: var(--muted); padding: 12px 16px;
+      border-bottom: 1px solid var(--border); font-weight: 500;
+    }
+    .table-dark-custom td {
+      padding: 13px 16px; border-bottom: 1px solid rgba(37,42,58,.5);
+      font-size: .875rem; vertical-align: middle;
+    }
+    .table-dark-custom tbody tr:hover { background: var(--surface2); }
+    .table-dark-custom a { color: var(--text); text-decoration: none; }
+    .table-dark-custom a:hover { color: var(--accent2); }
+
+    /* ALERTS */
+    .flash-msg {
+      padding: 12px 16px; border-radius: 6px; font-size: .875rem; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .flash-success { background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.3); color: #4ade80; }
+    .flash-danger  { background: rgba(239,68,68,.1);  border: 1px solid rgba(239,68,68,.3);  color: #f87171; }
+    .flash-info    { background: rgba(59,130,246,.1); border: 1px solid rgba(59,130,246,.3); color: #60a5fa; }
+    .flash-warning { background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.3); color: #fbbf24; }
+
+    /* AI SUGGESTION BOX */
+    .ai-box {
+      background: rgba(59,130,246,.05); border: 1px solid rgba(59,130,246,.2);
+      border-radius: 8px; padding: 16px;
+    }
+    .ai-box-title {
+      font-family: var(--mono); font-size: .7rem; color: var(--accent2);
+      letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .ai-box pre { white-space: pre-wrap; font-size: .85rem; color: var(--text); font-family: var(--sans); }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .main-wrap { margin-left: 0; }
+    }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+{% if current_user is defined and current_user %}
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">&#x25A3; SupportDesk</div>
+    <div class="sub">v1.0 // IT OPERATIONS</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Overview</div>
+    <div class="nav-item">
+      <a href="/dashboard" class="{% if request.path == '/dashboard' %}active{% endif %}">
+        <i class="fa fa-gauge-high"></i> Dashboard
+      </a>
+    </div>
+    <div class="nav-section-label">Tickets</div>
+    <div class="nav-item">
+      <a href="/tickets" class="{% if '/tickets' in request.path and 'new' not in request.path %}active{% endif %}">
+        <i class="fa fa-ticket"></i> All Tickets
+      </a>
+    </div>
+    <div class="nav-item">
+      <a href="/tickets/new" class="{% if '/tickets/new' in request.path %}active{% endif %}">
+        <i class="fa fa-plus-circle"></i> New Ticket
+      </a>
+    </div>
+    <div class="nav-section-label">Tools</div>
+    <div class="nav-item">
+      <a href="/log-analyzer" class="{% if '/log-analyzer' in request.path %}active{% endif %}">
+        <i class="fa fa-magnifying-glass-chart"></i> Log Analyzer
+      </a>
+    </div>
+    {% if role == 'admin' %}
+    <div class="nav-section-label">Admin</div>
+    <div class="nav-item">
+      <a href="/tickets?status=Open">
+        <i class="fa fa-circle-dot"></i> Open Queue
+      </a>
+    </div>
+    {% endif %}
+    <div class="nav-section-label">API</div>
+    <div class="nav-item">
+      <a href="#" onclick="alert('See README for API docs: /api/tickets, /api/auth/login, /api/stats')">
+        <i class="fa fa-code"></i> API Docs
+      </a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-pill">
+      <div class="user-avatar">{{ current_user.username[0].upper() }}</div>
+      <div class="user-info">
+        <div class="name">{{ current_user.username }}</div>
+        <span class="badge-role">{{ role }}</span>
+      </div>
+    </div>
+    <a href="/logout" style="display:block;margin-top:10px;color:var(--muted);font-size:.75rem;text-decoration:none;">
+      <i class="fa fa-arrow-right-from-bracket"></i> Logout
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrap">
+  <div class="topbar">
+    <span class="topbar-title">{% block page_title %}Dashboard{% endblock %}</span>
+    <div style="display:flex;gap:10px;align-items:center;">
+      {% if role == 'admin' %}
+      <span style="font-size:.7rem;font-family:var(--mono);color:var(--accent2);background:rgba(59,130,246,.1);padding:3px 10px;border-radius:20px;">ADMIN</span>
+      {% endif %}
+      <a href="/tickets/new" class="btn-primary-custom" style="padding:7px 14px;font-size:.8rem;">
+        <i class="fa fa-plus"></i> New Ticket
+      </a>
+    </div>
+  </div>
+  <div class="content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+      <div class="flash-msg flash-{{ category }}">
+        <i class="fa fa-{% if category == 'success' %}check-circle{% elif category == 'danger' %}exclamation-circle{% elif category == 'warning' %}triangle-exclamation{% else %}info-circle{% endif %}"></i>
+        {{ message }}
+      </div>
+      {% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </div>
+</div>
+
+{% else %}
+{% block auth_content %}{% endblock %}
+{% endif %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

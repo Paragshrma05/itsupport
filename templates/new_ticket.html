@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% set current_user = user %}
+{% block title %}New Ticket{% endblock %}
+{% block page_title %}// new ticket{% endblock %}
+
+{% block content %}
+<div style="max-width:680px;">
+  <div class="card-dark">
+    <div style="margin-bottom:24px;">
+      <h2 style="font-size:1.1rem;font-weight:600;margin-bottom:4px;">Submit Support Request</h2>
+      <p style="font-size:.85rem;color:var(--muted);">Describe your issue clearly. AI will auto-detect category, priority, and suggest fixes.</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+      <div class="flash-msg flash-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="POST" action="/tickets/new">
+      <div style="margin-bottom:18px;">
+        <label class="form-label">Issue Title <span style="color:var(--danger);">*</span></label>
+        <input type="text" name="title" class="form-ctrl" placeholder="e.g., Cannot connect to VPN from home office" required maxlength="200"/>
+      </div>
+      <div style="margin-bottom:24px;">
+        <label class="form-label">Description <span style="color:var(--danger);">*</span></label>
+        <textarea name="description" class="form-ctrl" rows="6" placeholder="Describe the issue in detail: what happened, when it started, error messages, steps to reproduce…" required style="resize:vertical;"></textarea>
+      </div>
+
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:24px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <i class="fa fa-robot" style="color:var(--accent2);font-size:.8rem;"></i>
+          <span style="font-family:var(--mono);font-size:.7rem;color:var(--accent2);letter-spacing:1px;">AI AUTO-CLASSIFICATION</span>
+        </div>
+        <p style="font-size:.8rem;color:var(--muted);margin:0;">Category, priority, and troubleshooting suggestions will be automatically generated when you submit.</p>
+      </div>
+
+      <div style="display:flex;gap:12px;">
+        <button type="submit" class="btn-primary-custom">
+          <i class="fa fa-paper-plane"></i> Submit Ticket
+        </button>
+        <a href="/tickets" class="btn-ghost">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

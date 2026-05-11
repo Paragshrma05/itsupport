@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% set current_user = user %}
+{% block title %}Tickets{% endblock %}
+{% block page_title %}// tickets{% endblock %}
+
+{% block content %}
+<!-- FILTER BAR -->
+<div class="card-dark" style="margin-bottom:20px;padding:16px 20px;">
+  <form method="GET" action="/tickets" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+    <div style="flex:1;min-width:180px;">
+      <label class="form-label">Search</label>
+      <input type="text" name="q" value="{{ search }}" class="form-ctrl" placeholder="Search tickets…"/>
+    </div>
+    <div style="min-width:130px;">
+      <label class="form-label">Status</label>
+      <select name="status" class="form-ctrl">
+        <option value="">All Statuses</option>
+        <option value="Open" {% if status_filter=='Open' %}selected{% endif %}>Open</option>
+        <option value="In Progress" {% if status_filter=='In Progress' %}selected{% endif %}>In Progress</option>
+        <option value="Resolved" {% if status_filter=='Resolved' %}selected{% endif %}>Resolved</option>
+      </select>
+    </div>
+    <div style="min-width:130px;">
+      <label class="form-label">Priority</label>
+      <select name="priority" class="form-ctrl">
+        <option value="">All Priorities</option>
+        <option value="Low" {% if priority_filter=='Low' %}selected{% endif %}>Low</option>
+        <option value="Medium" {% if priority_filter=='Medium' %}selected{% endif %}>Medium</option>
+        <option value="High" {% if priority_filter=='High' %}selected{% endif %}>High</option>
+        <option value="Critical" {% if priority_filter=='Critical' %}selected{% endif %}>Critical</option>
+      </select>
+    </div>
+    <div style="min-width:130px;">
+      <label class="form-label">Category</label>
+      <select name="category" class="form-ctrl">
+        <option value="">All Categories</option>
+        {% for cat in ['Hardware','Software','Network','Security','Database','Authentication','Performance','Other'] %}
+        <option value="{{ cat }}" {% if category_filter==cat %}selected{% endif %}>{{ cat }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn-primary-custom">
+      <i class="fa fa-filter"></i> Filter
+    </button>
+    {% if search or status_filter or priority_filter or category_filter %}
+    <a href="/tickets" class="btn-ghost">Clear</a>
+    {% endif %}
+  </form>
+</div>
+
+<!-- TICKET TABLE -->
+<div class="card-dark" style="padding:0;overflow:hidden;">
+  <div style="padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+    <span style="font-family:var(--mono);font-size:.8rem;color:var(--muted);">
+      {{ tickets|length }} ticket{{ 's' if tickets|length != 1 else '' }} found
+    </span>
+    <a href="/tickets/new" class="btn-primary-custom" style="padding:7px 14px;font-size:.8rem;">
+      <i class="fa fa-plus"></i> New
+    </a>
+  </div>
+  <table class="table-dark-custom">
+    <thead>
+      <tr>
+        <th>ID</th><th>Title</th><th>Category</th><th>Priority</th><th>Status</th>
+        {% if role == 'admin' %}<th>User</th>{% endif %}
+        <th>Created</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for t in tickets %}
+      <tr>
+        <td style="font-family:var(--mono);color:var(--muted);font-size:.75rem;">#{{ t.id }}</td>
+        <td>
+          <a href="/tickets/{{ t.id }}" style="font-weight:500;">{{ t.title[:50] }}{% if t.title|length > 50 %}…{% endif %}</a>
+        </td>
+        <td>
+          <span style="font-size:.75rem;color:var(--muted);font-family:var(--mono);">{{ t.category }}</span>
+        </td>
+        <td><span class="badge-priority badge-{{ t.priority.lower() }}">{{ t.priority }}</span></td>
+        <td>
+          {% if t.status == 'Open' %}<span class="badge-status badge-open">Open</span>
+          {% elif t.status == 'In Progress' %}<span class="badge-status badge-progress">In Progress</span>
+          {% else %}<span class="badge-status badge-resolved">Resolved</span>{% endif %}
+        </td>
+        {% if role == 'admin' %}<td style="font-size:.8rem;color:var(--muted);">{{ t.author.username if t.author else '—' }}</td>{% endif %}
+        <td style="font-size:.75rem;color:var(--muted);font-family:var(--mono);">{{ t.created_at.strftime('%b %d') }}</td>
+        <td>
+          <a href="/tickets/{{ t.id }}" style="color:var(--muted);font-size:.8rem;padding:4px 8px;border-radius:4px;" class="btn-ghost">View</a>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="8" style="text-align:center;padding:48px;color:var(--muted);">
+          <i class="fa fa-ticket" style="font-size:2rem;margin-bottom:12px;display:block;opacity:.3;"></i>
+          No tickets found. <a href="/tickets/new" style="color:var(--accent2);">Create one →</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
